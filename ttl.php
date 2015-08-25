@@ -1,6 +1,6 @@
 <?php
 
-require_once 'common.inc.php';
+require_once 'includes/common.inc.php';
 
 
 
@@ -9,7 +9,7 @@ if (isset($_POST['key'], $_POST['ttl'])) {
   if ($_POST['ttl'] == -1) {
     $redis->persist($_POST['key']);
   } else {
-    $redis->setTimeout($_POST['key'], $_POST['ttl']);
+    $redis->expire($_POST['key'], $_POST['ttl']);
   }
 
   header('Location: view.php?key='.urlencode($_POST['key']));
@@ -22,7 +22,7 @@ if (isset($_POST['key'], $_POST['ttl'])) {
 $page['css'][] = 'frame';
 $page['js'][]  = 'frame';
 
-require 'header.inc.php';
+require 'includes/header.inc.php';
 
 ?>
 <h2>Edit TTL</h2>
@@ -45,6 +45,6 @@ require 'header.inc.php';
 </form>
 <?php
 
-require 'footer.inc.php';
+require 'includes/footer.inc.php';
 
 ?>

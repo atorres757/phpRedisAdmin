@@ -1,5 +1,7 @@
 <?php
 
+$version = '1-1-1';
+
 header('Content-Type: text/html; charset=utf-8');
 header('Cache-Control: private');
 
@@ -24,15 +26,13 @@ header('Cache-Control: private');
 <title><?php echo format_html($server['host'])?> - phpRedisAdmin</title>
 
 <?php foreach ($page['css'] as $css) { ?>
-<link rel=stylesheet href="css/<?php echo $css; ?>.css?v1" media=all>
+<link rel=stylesheet href="css/<?php echo $css; ?>.css?v<?=$version?>" media=all>
 <?php } ?>
 
 <link rel="shortcut icon" href="images/favicon.png">
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.js"></script>
-
 <?php foreach ($page['js'] as $js) { ?>
-<script src="js/<?php echo $js; ?>.js?v1"></script>
+<script src="js/<?php echo $js; ?>.js?v<?=$version?>"></script>
 <?php } ?>
 
 </head>

@@ -1,8 +1,28 @@
-<?php 
-
+<?php
 
 function format_html($str) {
-  return htmlentities($str, ENT_COMPAT, 'UTF-8');
+  global $server;
+
+  if (isset($server['charset']) && $server['charset']) {
+    $res = mb_convert_encoding($str, 'utf-8', $server['charset']);
+  } else {
+    $res = $str;
+  }
+
+  $res = htmlentities($res, defined('ENT_SUBSTITUTE') ? (ENT_QUOTES | ENT_SUBSTITUTE) : ENT_QUOTES, 'utf-8');
+
+  return ($res || !$str) ? $res :  '(' . strlen($str) . ' bytes)';
+}
+
+
+function input_convert($str) {
+  global $server;
+
+  if (isset($server['charset']) && $server['charset']) {
+    return mb_convert_encoding($str, $server['charset'], 'utf-8');
+  } else {
+    return $str;
+  }
 }
 
 
@@ -62,5 +82,22 @@ function str_rand($length) {
   }
 
   return $r;
+}
+
+
+function encodeOrDecode($action, $key, $data) {
+  global $server;
+
+  if (isset($_GET['raw']) || !isset($server['serialization'])) {
+    return $data;
+  }
+
+  foreach ($server['serialization'] as $pattern => $closures) {
+    if (fnmatch($pattern, $key)) {
+      return $closures[$action]($data);
+    }
+  }
+
+  return $data;
 }
 

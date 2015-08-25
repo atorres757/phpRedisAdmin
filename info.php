@@ -1,6 +1,6 @@
 <?php
 
-require_once 'common.inc.php';
+require_once 'includes/common.inc.php';
 
 
 
@@ -24,14 +24,14 @@ $alt  = false;
 $page['css'][] = 'frame';
 $page['js'][]  = 'frame';
 
-require 'header.inc.php';
+require 'includes/header.inc.php';
 
 ?>
 <h2>Info</h2>
 
 <?php if (method_exists($redis, 'resetStat')) { ?>
 <p>
-<a href="?reset&amp;s=<?php echo $server['id']?>" class="reset">Reset usage statistics</a>
+<a href="?reset&amp;s=<?php echo $server['id']?>&amp;d=<?php echo $server['db']?>" class="reset">Reset usage statistics</a>
 </p>
 <?php } ?>
 
@@ -45,7 +45,7 @@ foreach ($info as $key => $value) {
   }
 
   ?>
-  <tr <?php echo $alt ? 'class="alt"' : ''?>><td><div><?php echo format_html($key)?></div></td><td><div><?php echo nl2br(format_html(is_array($value) ? print_r($value, true) : $value))?></div></td></tr>
+  <tr <?php echo $alt ? 'class="alt"' : ''?>><td><div><?php echo format_html($key)?></div></td><td><pre><?php echo format_html(is_array($value) ? print_r($value, true) : $value)?></pre></td></tr>
   <?php
 
   $alt = !$alt;
@@ -55,6 +55,6 @@ foreach ($info as $key => $value) {
 </table>
 <?php
 
-require 'footer.inc.php';
+require 'includes/footer.inc.php';
 
 ?>

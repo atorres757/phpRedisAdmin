@@ -1,6 +1,6 @@
 <?php
 
-require_once 'common.inc.php';
+require_once 'includes/common.inc.php';
 
 
 
@@ -34,7 +34,7 @@ if (isset($_POST['commands'])) {
         $i += 3;
         break;
       }
-      
+
       case 'LPUSH': {
         $redis->lPush($commands[$i+1], $commands[$i+2]);
         $i += 2;
@@ -69,15 +69,15 @@ if (isset($_POST['commands'])) {
 
 
   // Refresh the top so the key tree is updated.
-  require 'header.inc.php';
+  require 'includes/header.inc.php';
 
   ?>
   <script>
-  top.location.href = top.location.pathname+'?overview&s=<?php echo $server['id']?>';
+  top.location.href = top.location.pathname+'?overview&s=<?php echo $server['id']?>&d=<?php echo $server['db']?>';
   </script>
   <?php
 
-  require 'footer.inc.php';
+  require 'includes/footer.inc.php';
   die;
 }
 
@@ -87,7 +87,7 @@ if (isset($_POST['commands'])) {
 $page['css'][] = 'frame';
 $page['js'][]  = 'frame';
 
-require 'header.inc.php';
+require 'includes/header.inc.php';
 
 ?>
 <h2>Import</h2>
@@ -117,6 +117,6 @@ ZADD
 </form>
 <?php
 
-require 'footer.inc.php';
+require 'includes/footer.inc.php';
 
 ?>

@@ -1,6 +1,6 @@
 <?php
 
-require_once 'common.inc.php';
+require_once 'includes/common.inc.php';
 
 
 
@@ -14,15 +14,15 @@ if (isset($_POST['old'], $_POST['key'])) {
 
 
   // Refresh the top so the key tree is updated.
-  require 'header.inc.php';
+  require 'includes/header.inc.php';
 
   ?>
   <script>
-  top.location.href = top.location.pathname+'?view&s=<?php echo $server['id']?>&key=<?php echo urlencode($_POST['key'])?>';
+  top.location.href = top.location.pathname+'?view&s=<?php echo $server['id']?>&d=<?php echo $server['db']?>&key=<?php echo urlencode($_POST['key'])?>';
   </script>
   <?php
 
-  require 'footer.inc.php';
+  require 'includes/footer.inc.php';
   die;
 }
 
@@ -31,7 +31,7 @@ if (isset($_POST['old'], $_POST['key'])) {
 $page['css'][] = 'frame';
 $page['js'][]  = 'frame';
 
-require 'header.inc.php';
+require 'includes/header.inc.php';
 
 ?>
 <h2>Edit Name of <?php echo format_html($_GET['key'])?></h2>
@@ -51,6 +51,6 @@ require 'header.inc.php';
 </form>
 <?php
 
-require 'footer.inc.php';
+require 'includes/footer.inc.php';
 
 ?>

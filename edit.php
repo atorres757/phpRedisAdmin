@@ -1,6 +1,6 @@
 <?php
 
-require_once 'common.inc.php';
+require_once 'includes/common.inc.php';
 
 
 
@@ -27,9 +27,17 @@ if (isset($_POST['type'], $_POST['key'], $_POST['value'])) {
     die('ERROR: Your key is to long (max length is '.$config['maxkeylen'].')');
   }
 
+  $key   = input_convert($_POST['key']);
+  $value = input_convert($_POST['value']);
+  $value = encodeOrDecode('save', $key, $value);
+
+  if ($value === false || is_null($value)) {
+    die('ERROR: could not encode value');
+  }
+
   // String
   if ($_POST['type'] == 'string') {
-    $redis->set($_POST['key'], $_POST['value']);
+    $redis->set($key, $value);
   }
 
   // Hash
@@ -38,26 +46,26 @@ if (isset($_POST['type'], $_POST['key'], $_POST['value'])) {
       die('ERROR: Your hash key is to long (max length is '.$config['maxkeylen'].')');
     }
 
-    if ($edit && !$redis->hExists($_POST['key'], $_POST['hkey'])) {
-      $redis->hDel($_POST['key'], $_GET['hkey']);
+    if ($edit && !$redis->hExists($key, input_convert($_POST['hkey']))) {
+      $redis->hDel($key, input_convert($_GET['hkey']));
     }
 
-    $redis->hSet($_POST['key'], $_POST['hkey'], $_POST['value']);
+    $redis->hSet($key, input_convert($_POST['hkey']), $value);
   }
 
   // List
   else if (($_POST['type'] == 'list') && isset($_POST['index'])) {
-    $size = $redis->lLen($_POST['key']);
+    $size = $redis->lLen($key);
 
     if (($_POST['index'] == '') ||
         ($_POST['index'] == $size) ||
         ($_POST['index'] == -1)) {
       // Push it at the end
-      $redis->rPush($_POST['key'], $_POST['value']);
+      $redis->rPush($key, $value);
     } else if (($_POST['index'] >= 0) &&
                ($_POST['index'] < $size)) {
       // Overwrite an index
-      $redis->lSet($_POST['key'], $_POST['index'], $_POST['value']);
+      $redis->lSet($key, input_convert($_POST['index']), $value);
     } else {
       die('ERROR: Out of bounds index');
     }
@@ -67,32 +75,30 @@ if (isset($_POST['type'], $_POST['key'], $_POST['value'])) {
   else if ($_POST['type'] == 'set') {
     if ($_POST['value'] != $_POST['oldvalue']) {
       // The only way to edit a Set value is to add it and remove the old value.
-      $redis->sRem($_POST['key'], $_POST['oldvalue']);
-      $redis->sAdd($_POST['key'], $_POST['value']);
+      $redis->sRem($key, encodeOrDecode('save', $key, input_convert($_POST['oldvalue'])));
+      $redis->sAdd($key, $value);
     }
   }
 
   // ZSet
   else if (($_POST['type'] == 'zset') && isset($_POST['score'])) {
-    if ($_POST['value'] != $_POST['oldvalue']) {
-      // The only way to edit a ZSet value is to add it and remove the old value.
-      $redis->zRem($_POST['key'], $_POST['oldvalue']);
-      $redis->zAdd($_POST['key'], $_POST['score'], $_POST['value']);
-    }
+    // The only way to edit a ZSet value is to add it and remove the old value.
+    $redis->zRem($key, encodeOrDecode('save', $key, input_convert($_POST['oldvalue'])));
+    $redis->zAdd($key, input_convert($_POST['score']), $value);
   }
 
 
 
   // Refresh the top so the key tree is updated.
-  require 'header.inc.php';
+  require 'includes/header.inc.php';
 
   ?>
   <script>
-  top.location.href = top.location.pathname+'?view&s=<?php echo $server['id']?>&key=<?php echo urlencode($_POST['key'])?>';
+  top.location.href = top.location.pathname+'?view&s=<?php echo $server['id']?>&d=<?php echo $server['db']?>&key=<?php echo urlencode($_POST['key'])?>';
   </script>
   <?php
 
-  require 'footer.inc.php';
+  require 'includes/footer.inc.php';
   die;
 }
 
@@ -122,6 +128,8 @@ if ($edit) {
   else if ((($_GET['type'] == 'set') || ($_GET['type'] == 'zset')) && isset($_GET['value'])) {
     $value = $_GET['value'];
   }
+
+  $value = encodeOrDecode('load', $_GET['key'], $value);
 }
 
 
@@ -130,7 +138,7 @@ if ($edit) {
 $page['css'][] = 'frame';
 $page['js'][]  = 'frame';
 
-require 'header.inc.php';
+require 'includes/header.inc.php';
 
 ?>
 <h2><?php echo $edit ? 'Edit' : 'Add'?></h2>
@@ -149,12 +157,12 @@ require 'header.inc.php';
 
 <p>
 <label for="key">Key:</label>
-<input type="text" name="key" id="key" size="30" maxlength="30" <?php echo isset($_GET['key']) ? 'value="'.format_html($_GET['key']).'"' : ''?>>
+<input type="text" name="key" id="key" size="30" <?php echo isset($_GET['key']) ? 'value="'.format_html($_GET['key']).'"' : ''?>>
 </p>
 
 <p id="hkeyp">
 <label for="khey">Hash key:</label>
-<input type="text" name="hkey" id="hkey" size="30" maxlength="30" <?php echo isset($_GET['hkey']) ? 'value="'.format_html($_GET['hkey']).'"' : ''?>>
+<input type="text" name="hkey" id="hkey" size="30" <?php echo isset($_GET['hkey']) ? 'value="'.format_html($_GET['hkey']).'"' : ''?>>
 </p>
 
 <p id="indexp">
@@ -169,7 +177,7 @@ require 'header.inc.php';
 
 <p>
 <label for="value">Value:</label>
-<textarea name="value" id="value" cols="80" rows="20"><?php echo nl2br(format_html($value))?></textarea>
+<textarea name="value" id="value" cols="80" rows="20"><?php echo format_html($value)?></textarea>
 </p>
 
 <input type="hidden" name="oldvalue" value="<?php echo format_html($value)?>">
@@ -181,6 +189,6 @@ require 'header.inc.php';
 </form>
 <?php
 
-require 'footer.inc.php';
+require 'includes/footer.inc.php';
 
 ?>

@@ -6,7 +6,7 @@ if (!isset($_POST['post'])) {
 }
 
 
-require_once 'common.inc.php';
+require_once 'includes/common.inc.php';
 
 
 if (isset($_GET['key'])) {
@@ -46,7 +46,7 @@ if (isset($_GET['key'])) {
   }
 
 
-  die('?view&s='.$server['id'].'&key='.urlencode($_GET['key']));
+  die('?view&s='.$server['id'].'&d='.$server['db'].'&key='.urlencode($_GET['key']));
 }
 
 
@@ -56,8 +56,8 @@ if (isset($_GET['tree'])) {
   foreach ($keys as $key) {
     $redis->del($key);
   }
-  
-  die('?&s='.$server['id']);
+
+  die('?view&s='.$server['id'].'&d='.$server['db']);
 }
 
 ?>
